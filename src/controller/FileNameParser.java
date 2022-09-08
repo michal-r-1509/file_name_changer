@@ -23,13 +23,11 @@ class FileNameParser {
         String schemeResult = userTexts.getSchemeText()
                 .replaceAll("/", oldFileName)
                 .replaceAll("\\*", LocalDate.now().toString())
-                .replaceAll("\\?", textFromFile)
-                .replaceAll(":", replacing(userTexts.getAddedText1(), ""))
-                .replaceAll(">", replacing(userTexts.getAddedText2(), ""));
-        if (schemeResult.isBlank()){
+                .replaceAll("\\?", textFromFile);
+        if (schemeResult.isBlank()) {
             return oldFileName;
         }
-        if (schemeResult.length() > 150){
+        if (schemeResult.length() > 150) {
             return replaceForbiddenSigns(schemeResult.substring(0, 150)).trim();
         }
         return replaceForbiddenSigns(schemeResult).trim();

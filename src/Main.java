@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         JFrame window = new JFrame("File Name Changer");
         window.add(new UserInterface());
-        window.setMinimumSize(new Dimension(450, 400));
+        window.setMinimumSize(new Dimension(450, 350));
 
         window.requestFocusInWindow();
         window.setLocationByPlatform(true);

@@ -1,18 +1,19 @@
 package controller;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.time.LocalTime;
 
 public class OptionsController {
     private String filesType;
     private UserTexts userTexts;
-    private FilesDirectory directory;
+    private File directory;
     private NewNamesFile newNamesFile;
 
     public Path getOutputDirectory() {
         LocalTime time = LocalTime.now();
         String timeText = time.toString().replaceAll(":", "_").substring(0, 8);
-        return Path.of(directory.getDirectoryPath().toString() + "\\output_" + timeText);
+        return Path.of(getDirectory().toString() + "\\output_" + timeText);
     }
 
     public String getFilesType() {
@@ -23,8 +24,8 @@ public class OptionsController {
         return userTexts;
     }
 
-    public FilesDirectory getDirectory() {
-        return directory;
+    public Path getDirectory() {
+        return directory == null ? null : directory.toPath();
     }
 
     public NewNamesFile getNamesFile() {
@@ -35,12 +36,12 @@ public class OptionsController {
         this.userTexts = userTexts;
     }
 
-    public void setDirectory(FilesDirectory directory) {
-        this.directory = directory;
-    }
-
     public void setNamesFile(NewNamesFile newNamesFile) {
         this.newNamesFile = newNamesFile;
+    }
+
+    public void setDirectory(File directory) {
+        this.directory = directory;
     }
 
     public void setFilesType(String filesType) {

@@ -16,8 +16,7 @@ public class AppService {
 
     public boolean runAppService(OptionsController controller) {
         this.controller = controller;
-        boolean isDone = filesRenaming();
-        return isDone;
+        return filesRenaming();
     }
 
     private boolean filesRenaming() {
@@ -27,6 +26,10 @@ public class AppService {
 
         if (controller.getNamesFile() != null) {
             newFilesAppendingText = getNameListFromFile();
+        }
+
+        if (controller.getNamesFile() != null && newFilesAppendingText.size() != files.size()) {
+            return false;
         }
 
         if (files != null) {
@@ -63,7 +66,8 @@ public class AppService {
 
         for (int i = 0; i < files.size(); i++) {
             try {
-                Files.copy(files.get(i), Path.of(outputPath + "/" + newFilesNames.get(i) + "." + controller.getFilesType()));
+                Files.copy(files.get(i), Path.of(outputPath + "/" + newFilesNames.get(i) + "."
+                        + controller.getFilesType()));
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -87,15 +91,16 @@ public class AppService {
 
     private List<Path> getFilesFromDirectory() {
         try {
-            return Files.walk(controller.getDirectory().getDirectoryPath(), 1)
+            return Files.walk(controller.getDirectory(), 1)
                     .filter(Files::isRegularFile)
                     .filter(file -> {
                                 String fileName = file.toString();
                                 int index = fileName.lastIndexOf(".");
                                 return fileName.substring(index + 1).equals(controller.getFilesType());
                             }
-
-                    ).collect(Collectors.toList());
+                    )
+                    .sorted(Path::compareTo)
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }

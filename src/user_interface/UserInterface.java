@@ -15,12 +15,10 @@ public class UserInterface extends JPanel {
     private JLabel filesFolderChosen;
     private JLabel nameFileChosen;
     private JLabel forbiddenSignsLabel;
-    private JLabel text1Label, text2Label;
     private JLabel schemeLabel;
 
     private JTextField ignoredText;
     private JTextField forbiddenSignsReplacement;
-    private JTextField additionalText1, additionalText2;
     private JTextField schemeText;
 
     private JTextArea help;
@@ -46,7 +44,7 @@ public class UserInterface extends JPanel {
     private AppService service = new AppService();
     private InfoController infoController = new InfoController();
 
-    public UserInterface(){
+    public UserInterface() {
         setLayout(layout);
         initWindow();
     }
@@ -63,15 +61,16 @@ public class UserInterface extends JPanel {
         fileTypes = new JComboBox(options);
         c.gridx = 1;
         c.gridy = 0;
+        c.anchor = GridBagConstraints.CENTER;
         add(fileTypes, c);
 
         ignoredStringLabel = new JLabel("ignore text");
+        c.anchor = GridBagConstraints.EAST;
         c.gridx = 2;
         c.gridy = 0;
         add(ignoredStringLabel, c);
 
         ignoredText = new JTextField(10);
-        c.fill = GridBagConstraints.HORIZONTAL;
         c.gridwidth = 2;
         c.gridx = 3;
         c.gridy = 0;
@@ -79,7 +78,7 @@ public class UserInterface extends JPanel {
 
         choosingDirectory = new JButton("source directory");
         choosingDirectory.addActionListener(new ChoosingDirectory());
-        c.fill = GridBagConstraints.CENTER;
+        c.anchor = GridBagConstraints.WEST;
         c.gridwidth = 2;
         c.gridx = 0;
         c.gridy = 1;
@@ -140,52 +139,24 @@ public class UserInterface extends JPanel {
         c.gridy = 3;
         add(forbiddenSignsReplacement, c);
 
-        text1Label = new JLabel("text 1 (max 10)");
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 4;
-        add(text1Label, c);
-
-        additionalText1 = new JTextField(15);
-        additionalText1.setDocument(new JTextFieldLimit(10));
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 3;
-        c.gridx = 1;
-        c.gridy = 4;
-        add(additionalText1, c);
-
-        text2Label = new JLabel("text 2 (max 10)");
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 5;
-        add(text2Label, c);
-
-        additionalText2 = new JTextField(15);
-        additionalText2.setDocument(new JTextFieldLimit(10));
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.gridwidth = 3;
-        c.gridx = 1;
-        c.gridy = 5;
-        add(additionalText2, c);
-
         schemeLabel = new JLabel("scheme");
         c.gridwidth = 1;
         c.gridx = 0;
-        c.gridy = 6;
+        c.gridy = 4;
         add(schemeLabel, c);
 
         schemeText = new JTextField(15);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.gridwidth = 3;
         c.gridx = 1;
-        c.gridy = 6;
+        c.gridy = 4;
         add(schemeText, c);
 
         renameButton = new JButton("rename files");
         renameButton.addActionListener(new Rename());
         c.gridwidth = 1;
         c.gridx = 4;
-        c.gridy = 6;
+        c.gridy = 4;
         add(renameButton, c);
 
         help = new JTextArea(new HelpText().toString());
@@ -194,7 +165,7 @@ public class UserInterface extends JPanel {
         c.gridwidth = 5;
         c.gridheight = 5;
         c.gridx = 0;
-        c.gridy = 7;
+        c.gridy = 5;
         add(help, c);
 
         info = new JTextArea("");
@@ -203,7 +174,7 @@ public class UserInterface extends JPanel {
         c.gridwidth = 5;
         c.gridheight = 2;
         c.gridx = 0;
-        c.gridy = 13;
+        c.gridy = 11;
         add(info, c);
     }
 
@@ -211,11 +182,14 @@ public class UserInterface extends JPanel {
         @Override
         public void actionPerformed(ActionEvent e) {
             directoryChooser.showOpenDialog(UserInterface.this);
-            optionsController.setDirectory(new FilesDirectory(directoryChooser.getSelectedFile()));
-            String path = optionsController.getDirectory().getDirectoryPath().toString();
-            filesFolderChosen.setText(path.length() > 35 ? "..." + path.substring(path.length() - 35) : path);
-            filesFolderChosen.setToolTipText(path);
-            infoController.reset(info);
+            var directory = directoryChooser.getSelectedFile();
+            if (directory != null) {
+                optionsController.setDirectory(directory);
+                String path = optionsController.getDirectory().toString();
+                filesFolderChosen.setText(path.length() > 35 ? "..." + path.substring(path.length() - 35) : path);
+                filesFolderChosen.setToolTipText(path);
+                infoController.reset(info);
+            }
         }
     }
 
@@ -236,7 +210,7 @@ public class UserInterface extends JPanel {
         public void actionPerformed(ActionEvent e) {
             infoController.reset(info);
 
-            if (optionsController.getDirectory() == null){
+            if (optionsController.getDirectory() == null) {
                 infoController.setErrorText(info, "select source directory");
                 return;
             }
@@ -244,23 +218,25 @@ public class UserInterface extends JPanel {
             String type = Objects.requireNonNull(fileTypes.getSelectedItem()).toString();
             String ignored = ignoredText.getText();
             String forbiddenReplacement = forbiddenSignsReplacement.getText();
-            String prefix = additionalText1.getText();
-            String suffix = additionalText2.getText();
             String scheme = schemeText.getText();
+            if (scheme.equals("")) {
+                infoController.setErrorText(info, "type scheme");
+                return;
+            }
             boolean nameFromFile = fromFileNameCheckbox.isSelected();
-            if (!nameFromFile){
+            if (!nameFromFile) {
                 optionsController.setNamesFile(null);
             }
-            if (nameFromFile && optionsController.getNamesFile() == null){
+            if (nameFromFile && optionsController.getNamesFile() == null) {
                 infoController.setErrorText(info, "select data file");
                 return;
             }
 
             optionsController.setFilesType(type);
-            optionsController.setUserText(new UserTexts(ignored, forbiddenReplacement, prefix, suffix, scheme));
+            optionsController.setUserText(new UserTexts(ignored, forbiddenReplacement, scheme));
 
             boolean isDone = service.runAppService(optionsController);
-            if (!isDone){
+            if (!isDone) {
                 infoController.setErrorText(info, "something gone wrong");
                 return;
             }
