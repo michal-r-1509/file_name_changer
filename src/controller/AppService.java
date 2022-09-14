@@ -2,6 +2,9 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -77,8 +80,11 @@ public class AppService {
     }
 
     private List<String> getNameListFromFile() {
-        try {
-            Stream<String> names = Files.lines(controller.getNamesFile().getFile().toPath());
+                try {
+            CharsetDecoder charset = Charset.forName("windows-1250").newDecoder();
+            ByteBuffer buffer = ByteBuffer.wrap(Files.readAllBytes(controller.getNamesFile().getFile().toPath()));
+            String newContent = charset.decode(buffer).toString();
+            Stream<String> names = newContent.lines();
             return names
                     .map(fileName -> parser.replaceForbiddenSigns(fileName,
                             controller.getUserTexts().getForbiddenSignsReplacement()))
